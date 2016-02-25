@@ -32,19 +32,15 @@ typedef void i68k;
 //  - ROXL
 //  - ROXR
 
+// TODO: DIVUL, DIVSL
+// TODO: Determine which instructions were not available in the source documentation. Such as those above.
+// TODO: Go through each instruction and verify that they match documentation.
+
 #define bit_n(input, i)    ((input & (0x1 << i)) >> i)
 #define nybble_n(input, i) ((input & (0xF << (i*4))) >> (i*4))
 
 int decode_instr(uint16_t encoded_instr, i68k *decoded_instr)
 {
-	// NOP, encoded_instr == 0x4E71
-	// RESET, encoded_instr == 0x4E70
-	// RTE, encoded_instr == 0x4E73
-	// RTS, encoded_instr == 0x4E75
-	// RTR, encoded_instr == 0x4E77
-	// STOP, encoded_instr == 0x4E72 ++ 16-bit IMM
-	// TRAPV, encoded_instr == 0x4E76
-
 	// Divide the encoded instruction into nybbles.
 	char part_0 = nybble_n(encoded_instr, 0);
 	char part_1 = nybble_n(encoded_instr, 1);
@@ -68,6 +64,32 @@ int decode_instr(uint16_t encoded_instr, i68k *decoded_instr)
 	char bit_D = bit_n(encoded_instr, 0xD);
 	char bit_E = bit_n(encoded_instr, 0xE);
 	char bit_F = bit_n(encoded_instr, 0xF);
+
+	// Decode whole-word-constant instructions
+	switch(encoded_instr)
+	{
+		case 0x4E71:
+			// NOP
+			break;
+		case 0x4E70:
+			// RESET
+			break;
+		case 0x4E73:
+			// RTE
+			break;
+		case 0x4E75:
+			// RTS
+			break;
+		case 0x4E77:
+			// RTR
+			break;
+		case 0x4E72:
+			// STOP ++ 16-bit immediate
+			break;
+		case 0x4E76:
+			// TRAPV
+			break;
+	}
 
 	switch(part_3)
 	{
@@ -180,54 +202,193 @@ int decode_instr(uint16_t encoded_instr, i68k *decoded_instr)
 			}
 			break;
 		case 0x5:
-			// ADDQ
-			// DBcc
-			// Scc
-			// SUBQ
+			if(part_1 == 0xB && bit_3)
+			{
+				// DBcc
+			}
+			else if(bit_7 && bit_6)
+			{
+				// Scc
+			}
+			else if(bit_8)
+			{
+				// SUBQ
+			}
+			else
+			{
+				// ADDQ
+			}
+			break;
 		case 0x6:
-			// Bcc
-			// BRA
-			// BSR
+			switch(part_2)
+			{
+				case 0x0:
+					// BRA
+					break;
+				case 0x1:
+					// BSR
+					break;
+				default:
+					// Bcc
+					break;
+			}
+			break;
 		case 0x7:
 			// MOVEQ
+			break;
 		case 0x8:
-			// SBCD
-			// DIVU
-			// DIVS
+			if(part_1 == 0x0 && bit_8)
+			{
+				// SBCD
+			}
+			else if(!bit_8 && bit_7 && bit_6)
+			{
+				// DIVU
+			}
+			else if(bit_8 && bit_7 && bit_6)
+			{
+				// DIVS
+			}
+			else
+			{
+				// OR
+			}
+			break;
 		case 0x9:
-			// SUB
-			// SUBA
-			// SUBX
+			if(bit_7 && bit_6)
+			{
+				// SUBA
+			}
+			else if(bit_8 && !bit_5 && !bit_4)
+			{
+				// SUBX
+			}
+			else
+			{
+				// SUB
+			}
+			break;
 		case 0xB:
-			// CMP
-			// CMPA
-			// CMPM
-			// EOR
+			if(bit_7 && bit_6)
+			{
+				// CMPA
+			}
+			else if(bit_8 && !bit_5 && !bit_4 && bit_3)
+			{
+				// CMPM
+			}
+			else if(bit_8)
+			{
+				// EOR
+			}
+			else
+			{
+				// CMP
+			}
+			break;
 		case 0xC:
-			// ABCD
-			// AND
-			// EXG
-			// NOT
-			// OR
+			if(part_1 == 0x0 && bit_8)
+			{
+				// ABCD
+			}
+			else if(bit_8 && !bit_5 && !bit_4)
+			{
+				// EXG
+			}
+			else if(part_2 == 0x6)
+			{
+				// NOT
+			}
+			else
+			{
+				// AND
+			}
+			break;
 		case 0xD:
-			// ADDA
-			// ADD
-			// ADDX
+			if(bit_7 && bit_6)
+			{
+				// ADDA
+			}
+			else if(bit_8 && !bit_5 && !bit_4)
+			{
+				// ADDX
+			}
+			else
+			{
+				// ADD
+			}
+			break;
 		case 0xE:
-			// ROL
-			// ASR
-			// ROXR
-			// LSL
-			// ASL
-			// LSR
-			// ROR
-			// ROXL
+			if(bit_7 && bit_6)
+			{
+				// Memory Shift Instructions //
+				switch(part_2)
+				{
+					case 0x0:
+						// ASR
+						break;
+					case 0x1:
+						// ASL
+						break;
+					case 0x2:
+						// LSR
+						break;
+					case 0x3:
+						// LSL
+						break;
+					case 0x4:
+						// ROXR
+						break;
+					case 0x5:
+						// ROXL
+						break;
+					case 0x6:
+						// ROR
+						break;
+					case 0x7:
+						// ROL
+						break;
+				}
+			}
+			else if(!bit_4 && !bit_3)
+			{
+				// Register Shift Instructions //
+				switch(((bit_4 << 2)  & (bit_3 << 1) & bit_8) & 0x7)
+				{
+					case 0x0:
+						// ASR
+						break;
+					case 0x1:
+						// ASL
+						break;
+					case 0x2:
+						// LSR
+						break;
+					case 0x3:
+						// LSL
+						break;
+					case 0x4:
+						// ROXR
+						break;
+					case 0x5:
+						// ROXL
+						break;
+					case 0x6:
+						// ROR
+						break;
+					case 0x7:
+						// ROL
+						break;
+				}
+			}
+			break;
 		case 0x1:
 		case 0x2:
 		case 0x3:
 		case 0xA:
 		case 0xF:
 			// <NONE>
+			break;
 	}
 }
 
@@ -475,7 +636,7 @@ error_t decode_shift(uint16_t encoded_instr, i68k *decoded_instr)
 //	|---------------------------------------------------------------|
 //	|             32 BITS DATA (included last Word)                 |
 //	-----------------------------------------------------------------
-// CMPA
+// CMPA -- TODO: Correct this!
 //	-----------------------------------------------------------------
 //	|15 |14 |13 |12 |11 |10 | 9 | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
 //	|---|---|---|---|-----------|-------|---|-----------|-----------|
@@ -489,11 +650,11 @@ error_t decode_shift(uint16_t encoded_instr, i68k *decoded_instr)
 //	| 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | SIZE  |    MODE   | REGISTER  |
 //	----------------------------------------=========================
 //	                                        |----------<ea>---------|
-// OR
+// OR -- FIXED ERROR IN BIT 14
 //	-----------------------------------------------------------------
 //	|15 |14 |13 |12 |11 |10 | 9 | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
 //	|---|---|---|---|-----------|---|-------|-----------|-----------|
-//	| 1 | 1 | 0 | 0 |  REGISTER | D |  SIZE |    MODE   |  REGISTER |
+//	| 1 | 0 | 0 | 0 |  REGISTER | D |  SIZE |    MODE   |  REGISTER |
 //	----------------------------=====================================
 //	                            |--<opmode>-|----------<ea>---------|
 // DIVU
@@ -813,7 +974,7 @@ error_t decode_shift(uint16_t encoded_instr, i68k *decoded_instr)
 //	| 0 | 1 | 0 | 0 | 0 | 1 | 1 | 0 | 1 | 1 |    MODE   | REGISTER  |
 //	----------------------------------------=========================
 //	                                        |----------<ea>---------|
-// SUBA
+// SUBA -- TODO: Correct this!
 //	-----------------------------------------------------------------
 //	|15 |14 |13 |12 |11 |10 | 9 | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
 //	|---|---|---|---|-----------|-------|---|-----------|-----------|
