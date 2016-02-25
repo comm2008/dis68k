@@ -1,3 +1,8 @@
+#include <stdint.h>
+
+// TODO: i68k type.
+typedef void i68k;
+
 // ROL
 //	In the case of the rotating of a register:
 //	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -26,125 +31,221 @@
 //  - ROR
 //  - ROXL
 //  - ROXR
-decode_instr(uint16_t encoded_instr, i68k *decoded_instr)
+
+#define bit_n(input, i)    ((input & (0x1 << i)) >> i)
+#define nybble_n(input, i) ((input & (0xF << (i*4))) >> (i*4))
+
+int decode_instr(uint16_t encoded_instr, i68k *decoded_instr)
 {
-    switch((encoded_instr & 0xF000) >> 12)
-    {
-        case 0x0:
-            // ADDI
-            // ANDI
-            // ANDI_to_CCR
-            // ANDI_to_SR
-            // BCHG
-            // BCLR
-            // BSET
-            // BTST
-            // CMPI
-            // EORI
-            // EORI_to_CCR
-            // EORI_to_SR
-            // MOVEP
-            // ORI_to_CCR
-            // ORI_to_SR
-            // ORI
-            // SUBI
-        case 0x4:
-            // CHK
-            // CLR
-            // EXT
-            // ILLEGAL
-            // JMP
-            // JSR
-            // LEA
-            // LINK
-            // MOVE_from_CCR
-            // MOVE_from_SR
-            // MOVE_to_CCR
-            // MOVE_to_SR
-            // MOVE_USP
-            // MOVEM
-            // NBCD
-            // NEG
-            // NEGX
-            // NOP
-            // RESET
-            // RTE
-            // RTS
-            // PEA
-            // RTR
-            // STOP
-            // SWAP
-            // TAS
-            // TRAPV
-            // TST
-            // UNLK
-        case 0x5:
-            // ADDQ
-            // DBcc
-            // Scc
-            // SUBQ
-        case 0x6:
-            // Bcc
-            // BRA
-            // BSR
-        case 0x7:
-            // MOVEQ
-        case 0x8:
-            // SBCD
-            // DIVU
-            // DIVS
-        case 0x9:
-            // SUB
-            // SUBA
-            // SUBX
-        case 0xB:
-            // CMP
-            // CMPA
-            // CMPM
-            // EOR
-        case 0xC:
-            // ABCD
-            // AND
-            // EXG
-            // NOT
-            // OR
-        case 0xD:
-            // ADDA
-            // ADD
-            // ADDX
-        case 0xE:
-            // ROL
-            // ASR
-            // ROXR
-            // LSL
-            // ASL
-            // LSR
-            // ROR
-            // ROXL
-        case 0x1:
-        case 0x2:
-        case 0x3:
-        case 0xA:
-        case 0xF:
-            // <NONE>
-    }
+	// NOP, encoded_instr == 0x4E71
+	// RESET, encoded_instr == 0x4E70
+	// RTE, encoded_instr == 0x4E73
+	// RTS, encoded_instr == 0x4E75
+	// RTR, encoded_instr == 0x4E77
+	// STOP, encoded_instr == 0x4E72 ++ 16-bit IMM
+	// TRAPV, encoded_instr == 0x4E76
+
+	// Divide the encoded instruction into nybbles.
+	char part_0 = nybble_n(encoded_instr, 0);
+	char part_1 = nybble_n(encoded_instr, 1);
+	char part_2 = nybble_n(encoded_instr, 2);
+	char part_3 = nybble_n(encoded_instr, 3);
+
+	char bit_0 = bit_n(encoded_instr, 0x0);
+	char bit_1 = bit_n(encoded_instr, 0x1);
+	char bit_2 = bit_n(encoded_instr, 0x2);
+	char bit_1 = bit_n(encoded_instr, 0x1);
+	char bit_3 = bit_n(encoded_instr, 0x3);
+	char bit_4 = bit_n(encoded_instr, 0x4);
+	char bit_5 = bit_n(encoded_instr, 0x5);
+	char bit_6 = bit_n(encoded_instr, 0x6);
+	char bit_7 = bit_n(encoded_instr, 0x7);
+	char bit_8 = bit_n(encoded_instr, 0x8);
+	char bit_9 = bit_n(encoded_instr, 0x9);
+	char bit_A = bit_n(encoded_instr, 0xA);
+	char bit_B = bit_n(encoded_instr, 0xB);
+	char bit_C = bit_n(encoded_instr, 0xC);
+	char bit_D = bit_n(encoded_instr, 0xD);
+	char bit_E = bit_n(encoded_instr, 0xE);
+	char bit_F = bit_n(encoded_instr, 0xF);
+
+	switch(part_3)
+	{
+		case 0x0:
+			switch(part_2)
+			{
+				case 0x0:
+					// ORI
+					// ORI_to_CCR
+					// ORI_to_SR
+					break;
+				case 0x2:
+					// ANDI
+					// ANDI_to_CCR
+					// ANDI_to_SR
+					break;
+				case 0x4:
+					// SUBI
+					break;
+				case 0x6:
+					// ADDI
+					break;
+				case 0xA:
+					// EORI
+					// EORI_to_CCR
+					// EORI_to_SR
+					break;
+				case 0xC:
+					// CMPI
+					break;
+				default:
+					switch((encoded_instr & 0x01C0) >> 6)
+					{
+						case 0x4:
+							// BTST
+							break;
+						case 0x5:
+							// BCHG
+							break;
+						case 0x6:
+							// BCLR
+							break;
+						case 0x7:
+							// BSET
+							break;
+						default:
+							if(bit_8 && !bit_5 && !bit_4 && bit_3)
+							{
+								// MOVEP
+							}
+							else
+							{
+								// Error
+							}
+					}
+					break;
+			}
+			break;
+		case 0x4:
+			if(bit_8 && !bit_6)
+			{
+				// CHK
+			}
+			else if(bit_8 && bit_7 && bit_6)
+			{
+				// LEA
+			}
+			else if(bit_B && !bit_9 && !bit_8 && bit_7)
+			{
+				// MOVEM
+			}
+			else
+			{
+				switch(part_2)
+				{
+					case 0x0:
+						// MOVE_from_SR, part_2 == 0x0 && bit_7 && bit_6
+						// NEGX, part_2 == 0x0
+						break;
+					case 0x2:
+						// MOVE_from_CCR, part_2 == 0x2 && bit_7 && bit_6
+						// CLR
+						break;
+					case 0x4:
+						// MOVE_to_CCR, part_2 == 0x4 && bit_7 && bit_6
+						// NEG, part_2 == 0x4
+						break;
+					case 0x6:
+						// MOVE_to_SR, part_2 == 0x6 && bit_7 && bit_6
+						break;
+					case 0x8:
+						// EXT, part_2 == 0x8
+						// NBCD, part_2 == 0x8 && !bit_7 && !bit_6
+						// PEA, part_2 == 0x8 && !bit_7 && bit_6
+						// SWAP, part_2 == 0x8 && part_1 == 0x4 && bit_3
+						break;
+					case 0xA:
+						// ILLEGAL, part_2 == 0xA
+						// TAS, part_2 == 0xA && bit_7 && bit_6
+						// TST, part_2 == 0xA
+						break;
+					case 0xE:
+						// JMP, part_2 == 0xE && bit_7 && bit_6
+						// JSR, part_2 == 0xE && bit_7 && !bit_6
+						// LINK, part_2 == 0xE && part_1 == 0x5
+						// MOVE_USP, part_2 == 0xE && part_1 == 0x6
+						// UNLK, part_2 == 0xE && part_1 == 0x5 && bit_3
+						break;
+				}
+			}
+			break;
+		case 0x5:
+			// ADDQ
+			// DBcc
+			// Scc
+			// SUBQ
+		case 0x6:
+			// Bcc
+			// BRA
+			// BSR
+		case 0x7:
+			// MOVEQ
+		case 0x8:
+			// SBCD
+			// DIVU
+			// DIVS
+		case 0x9:
+			// SUB
+			// SUBA
+			// SUBX
+		case 0xB:
+			// CMP
+			// CMPA
+			// CMPM
+			// EOR
+		case 0xC:
+			// ABCD
+			// AND
+			// EXG
+			// NOT
+			// OR
+		case 0xD:
+			// ADDA
+			// ADD
+			// ADDX
+		case 0xE:
+			// ROL
+			// ASR
+			// ROXR
+			// LSL
+			// ASL
+			// LSR
+			// ROR
+			// ROXL
+		case 0x1:
+		case 0x2:
+		case 0x3:
+		case 0xA:
+		case 0xF:
+			// <NONE>
+	}
 }
 
 error_t decode_shift(uint16_t encoded_instr, i68k *decoded_instr)
 {
-    // For all shift instructions, the leading nybble must match the following:
-    //
-    //	-----------------
-    //	|15 |14 |13 |12 | ...
-    //	|---|---|---|---| ...
-    //	| 1 | 1 | 1 | 0 | ...
-    //	-----------------
-    if((instr & 0xF000) != 0xE000)
-    {
-        return -1;
-    }
+	// For all shift instructions, the leading nybble must match the following:
+	//
+	//	-----------------
+	//	|15 |14 |13 |12 | ...
+	//	|---|---|---|---| ...
+	//	| 1 | 1 | 1 | 0 | ...
+	//	-----------------
+	if((instr & 0xF000) != 0xE000)
+	{
+		return -1;
+	}
 
-    if()
+	if()
 }
 
 // typedef struct {
