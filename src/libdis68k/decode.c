@@ -1,3 +1,8 @@
+#include <stdint.h>
+
+// TODO: i68k type.
+typedef void i68k;
+
 // ROL
 //	In the case of the rotating of a register:
 //	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -26,28 +31,76 @@
 //  - ROR
 //  - ROXL
 //  - ROXR
-decode_instr(uint16_t encoded_instr, i68k *decoded_instr)
+
+#define bit_n(input, i)    ((input & (0x1 << i)) >> i)
+#define nybble_n(input, i) ((input & (0xF << (i*4))) >> (i*4))
+
+int decode_instr(uint16_t encoded_instr, i68k *decoded_instr)
 {
-    switch((encoded_instr & 0xF000) >> 12)
+    // Divide the encoded instruction into nybbles.
+    char part_0 = (encoded_instr & 0x000F) >> 0;
+    char part_1 = (encoded_instr & 0x00F0) >> 4;
+    char part_2 = (encoded_instr & 0x0F00) >> 8;
+    char part_3 = (encoded_instr & 0xF000) >> 12;
+
+    char bit_0 = bit_n(encoded_instr, 0);
+    char bit_1 = bit_n(encoded_instr, 1);
+    char bit_2 = bit_n(encoded_instr, 2);
+    char bit_1 = bit_n(encoded_instr, 1);
+    char bit_3 = bit_n(encoded_instr, 3);
+    char bit_4 = bit_n(encoded_instr, 4);
+    char bit_5 = bit_n(encoded_instr, 5);
+    char bit_6 = bit_n(encoded_instr, 6);
+    char bit_7 = bit_n(encoded_instr, 7);
+    char bit_8 = bit_n(encoded_instr, 8);
+    char bit_1 = bit_n(encoded_instr, 1);
+
+    switch(part_3)
     {
         case 0x0:
-            // ADDI
-            // ANDI
-            // ANDI_to_CCR
-            // ANDI_to_SR
-            // BCHG
-            // BCLR
-            // BSET
-            // BTST
-            // CMPI
-            // EORI
-            // EORI_to_CCR
-            // EORI_to_SR
-            // MOVEP
-            // ORI_to_CCR
-            // ORI_to_SR
-            // ORI
-            // SUBI
+            switch(part_2)
+            {
+                case 0x0:
+                    // ORI
+                    // ORI_to_CCR
+                    // ORI_to_SR
+                case 0x2:
+                    // ANDI
+                    // ANDI_to_CCR
+                    // ANDI_to_SR
+                case 0x4:
+                    // SUBI
+                case 0x6:
+                    // ADDI
+                case 0xA:
+                    // EORI
+                    // EORI_to_CCR
+                    // EORI_to_SR
+                case 0xC:
+                    // CMPI
+                default:
+                    case((encoded_instr & 0x01C0) >> 6))
+                    {
+                        case 0x4:
+                            // BTST
+                            break;
+                        case 0x5:
+                            // BCHG
+                            break;
+                        case 0x6:
+                            // BCLR
+                            break;
+                        case 0x7:
+                            // BSET
+                            break;
+                        default:
+                            (encoded_instr & 0x0100) == 0x0100
+                            if()
+                            {
+                                // MOVEP
+                            }
+                    }
+            }
         case 0x4:
             // CHK
             // CLR
