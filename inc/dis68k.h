@@ -1,4 +1,7 @@
-typedef i68k {
-} i68k;
+#include "opcode.h"
+#include "fields.h"
 
-INSTRUCTION(ADDQ, );
+typedef struct i68k {
+	int opcode;
+	union i68k_fields fields;
+} i68k;

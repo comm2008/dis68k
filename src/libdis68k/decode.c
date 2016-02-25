@@ -1,7 +1,5 @@
 #include <stdint.h>
-
-// TODO: i68k type.
-typedef void i68k;
+#include "dis68k.h"
 
 // ROL
 //	In the case of the rotating of a register:
@@ -39,7 +37,7 @@ typedef void i68k;
 #define bit_n(input, i)    ((input & (0x1 << i)) >> i)
 #define nybble_n(input, i) ((input & (0xF << (i*4))) >> (i*4))
 
-int decode_instr(uint16_t encoded_instr, i68k *decoded_instr)
+int decode_instr(uint16_t *encoded, i68k *decoded)
 {
 	// Divide the encoded instruction into nybbles.
 	char part_0 = nybble_n(encoded_instr, 0);
@@ -89,6 +87,24 @@ int decode_instr(uint16_t encoded_instr, i68k *decoded_instr)
 		case 0x4E76:
 			// TRAPV
 			break;
+		case 0x003C:
+			// ORI_to_CCR
+			break;
+		case 0x007C:
+			// ORI_to_SR
+			break;
+		case 0x023C:
+			// ANDI_to_CCR
+			break;
+		case 0x027C:
+			// ANDI_to_SR
+			break;
+		case 0x0A3C:
+			// EORI_to_CCR
+			break;
+		case 0x0A7C:
+			// EORI_to_SR
+			break;
 	}
 
 	switch(part_3)
@@ -98,13 +114,9 @@ int decode_instr(uint16_t encoded_instr, i68k *decoded_instr)
 			{
 				case 0x0:
 					// ORI
-					// ORI_to_CCR
-					// ORI_to_SR
 					break;
 				case 0x2:
 					// ANDI
-					// ANDI_to_CCR
-					// ANDI_to_SR
 					break;
 				case 0x4:
 					// SUBI
@@ -114,8 +126,6 @@ int decode_instr(uint16_t encoded_instr, i68k *decoded_instr)
 					break;
 				case 0xA:
 					// EORI
-					// EORI_to_CCR
-					// EORI_to_SR
 					break;
 				case 0xC:
 					// CMPI
@@ -353,7 +363,7 @@ int decode_instr(uint16_t encoded_instr, i68k *decoded_instr)
 			else if(!bit_4 && !bit_3)
 			{
 				// Register Shift Instructions //
-				switch(((bit_4 << 2)  & (bit_3 << 1) & bit_8) & 0x7)
+				switch(((bit_4 << 2)  | (bit_3 << 1) | bit_8) & 0x7)
 				{
 					case 0x0:
 						// ASR
@@ -390,23 +400,6 @@ int decode_instr(uint16_t encoded_instr, i68k *decoded_instr)
 			// <NONE>
 			break;
 	}
-}
-
-error_t decode_shift(uint16_t encoded_instr, i68k *decoded_instr)
-{
-	// For all shift instructions, the leading nybble must match the following:
-	//
-	//	-----------------
-	//	|15 |14 |13 |12 | ...
-	//	|---|---|---|---| ...
-	//	| 1 | 1 | 1 | 0 | ...
-	//	-----------------
-	if((instr & 0xF000) != 0xE000)
-	{
-		return -1;
-	}
-
-	if()
 }
 
 // typedef struct {
