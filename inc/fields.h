@@ -1,13 +1,52 @@
+// Instruction Field Structs // 
+
+#define OP_SIZE_BYTE 0
+#define OP_SIZE_WORD 1
+#define OP_SIZE_LONG 2
+
 typedef struct i68k_abcd {
+	// reg_or_mem:
+	//   0 => ABCD -(Ay), -(Ax)
+	//   1 => ABCD Dy, Dx
+	char reg_or_mem;
+	char reg_x;
+	char reg_y;
 } i68k_abcd;
 
+static int encode_abcd(i68k_abcd i, char *buf, size_t count)
+{
+	if(count < 2)
+	{
+		return -1;
+	}
+
+	buf[0] = 0xC1 | ( ( i.reg_x & 0x7 ) << 1 );
+	buf[1] = 0x00 | ( ( i.reg_or_mem & 0x1 ) << 3 ) | ( i.reg_y & 0x7 );
+
+	return 2;
+}
+
+static int decode_abcd(char *buf, size_t count, i68k_abcd *i)
+{
+	return 2;
+}
+
 typedef struct i68k_add {
+	char reg;
+	char opmode;
+	char effective_address;
 } i68k_add;
 
 typedef struct i68k_adda {
+	char reg;
+	char opmode;
+	char effective_address;
 } i68k_adda;
 
 typedef struct i68k_addi {
+	char reg;
+	char opmode;
+	char effective_address;
 } i68k_addi;
 
 typedef struct i68k_addq {
