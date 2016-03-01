@@ -37,38 +37,47 @@
 #define bit_n(input, i)    ((input & (0x1 << i)) >> i)
 #define nybble_n(input, i) ((input & (0xF << (i*4))) >> (i*4))
 
-int decode_instr(uint16_t *encoded, i68k *decoded)
+int decode_instr(i68k *decoded, char *encoded, size_t encoded_length)
 {
-	// Divide the encoded instruction into nybbles.
-	char part_0 = nybble_n(encoded_instr, 0);
-	char part_1 = nybble_n(encoded_instr, 1);
-	char part_2 = nybble_n(encoded_instr, 2);
-	char part_3 = nybble_n(encoded_instr, 3);
+	// Divide the encoded instruction into:
+	// a) Words
+	uint16_t word_0 = (encoded[0] << 8) | encoded[1];
 
-	char bit_0 = bit_n(encoded_instr, 0x0);
-	char bit_1 = bit_n(encoded_instr, 0x1);
-	char bit_2 = bit_n(encoded_instr, 0x2);
-	char bit_1 = bit_n(encoded_instr, 0x1);
-	char bit_3 = bit_n(encoded_instr, 0x3);
-	char bit_4 = bit_n(encoded_instr, 0x4);
-	char bit_5 = bit_n(encoded_instr, 0x5);
-	char bit_6 = bit_n(encoded_instr, 0x6);
-	char bit_7 = bit_n(encoded_instr, 0x7);
-	char bit_8 = bit_n(encoded_instr, 0x8);
-	char bit_9 = bit_n(encoded_instr, 0x9);
-	char bit_A = bit_n(encoded_instr, 0xA);
-	char bit_B = bit_n(encoded_instr, 0xB);
-	char bit_C = bit_n(encoded_instr, 0xC);
-	char bit_D = bit_n(encoded_instr, 0xD);
-	char bit_E = bit_n(encoded_instr, 0xE);
-	char bit_F = bit_n(encoded_instr, 0xF);
+	// b) Bytes
+	char byte_0 = encoded[0];
+	char byte_1 = encoded[1];
+
+	// c) Hex digits
+	char nybble_0 = nybble_n(word_0, 0);
+	char nybble_1 = nybble_n(word_0, 1);
+	char nybble_2 = nybble_n(word_0, 2);
+	char nybble_3 = nybble_n(word_0, 3);
+
+	// d) Bits
+	char bit_0 = bit_n(word_0, 0x0);
+	char bit_1 = bit_n(word_0, 0x1);
+	char bit_2 = bit_n(word_0, 0x2);
+	char bit_1 = bit_n(word_0, 0x1);
+	char bit_3 = bit_n(word_0, 0x3);
+	char bit_4 = bit_n(word_0, 0x4);
+	char bit_5 = bit_n(word_0, 0x5);
+	char bit_6 = bit_n(word_0, 0x6);
+	char bit_7 = bit_n(word_0, 0x7);
+	char bit_8 = bit_n(word_0, 0x8);
+	char bit_9 = bit_n(word_0, 0x9);
+	char bit_A = bit_n(word_0, 0xA);
+	char bit_B = bit_n(word_0, 0xB);
+	char bit_C = bit_n(word_0, 0xC);
+	char bit_D = bit_n(word_0, 0xD);
+	char bit_E = bit_n(word_0, 0xE);
+	char bit_F = bit_n(word_0, 0xF);
 
 	// Decode whole-word-constant instructions
-	switch(encoded_instr)
+	switch(word_0)
 	{
 		case 0x4E71:
 			// NOP
-			break;
+			return decode_nop(decoded, encoded, encoded_length);
 		case 0x4E70:
 			// RESET
 			break;
@@ -107,10 +116,10 @@ int decode_instr(uint16_t *encoded, i68k *decoded)
 			break;
 	}
 
-	switch(part_3)
+	switch(nybble_3)
 	{
 		case 0x0:
-			switch(part_2)
+			switch(nybble_2)
 			{
 				case 0x0:
 					// ORI
@@ -173,46 +182,46 @@ int decode_instr(uint16_t *encoded, i68k *decoded)
 			}
 			else
 			{
-				switch(part_2)
+				switch(nybble_2)
 				{
 					case 0x0:
-						// MOVE_from_SR, part_2 == 0x0 && bit_7 && bit_6
-						// NEGX, part_2 == 0x0
+						// MOVE_from_SR, nybble_2 == 0x0 && bit_7 && bit_6
+						// NEGX, nybble_2 == 0x0
 						break;
 					case 0x2:
-						// MOVE_from_CCR, part_2 == 0x2 && bit_7 && bit_6
+						// MOVE_from_CCR, nybble_2 == 0x2 && bit_7 && bit_6
 						// CLR
 						break;
 					case 0x4:
-						// MOVE_to_CCR, part_2 == 0x4 && bit_7 && bit_6
-						// NEG, part_2 == 0x4
+						// MOVE_to_CCR, nybble_2 == 0x4 && bit_7 && bit_6
+						// NEG, nybble_2 == 0x4
 						break;
 					case 0x6:
-						// MOVE_to_SR, part_2 == 0x6 && bit_7 && bit_6
+						// MOVE_to_SR, nybble_2 == 0x6 && bit_7 && bit_6
 						break;
 					case 0x8:
-						// EXT, part_2 == 0x8
-						// NBCD, part_2 == 0x8 && !bit_7 && !bit_6
-						// PEA, part_2 == 0x8 && !bit_7 && bit_6
-						// SWAP, part_2 == 0x8 && part_1 == 0x4 && bit_3
+						// EXT, nybble_2 == 0x8
+						// NBCD, nybble_2 == 0x8 && !bit_7 && !bit_6
+						// PEA, nybble_2 == 0x8 && !bit_7 && bit_6
+						// SWAP, nybble_2 == 0x8 && nybble_1 == 0x4 && bit_3
 						break;
 					case 0xA:
-						// ILLEGAL, part_2 == 0xA
-						// TAS, part_2 == 0xA && bit_7 && bit_6
-						// TST, part_2 == 0xA
+						// ILLEGAL, nybble_2 == 0xA
+						// TAS, nybble_2 == 0xA && bit_7 && bit_6
+						// TST, nybble_2 == 0xA
 						break;
 					case 0xE:
-						// JMP, part_2 == 0xE && bit_7 && bit_6
-						// JSR, part_2 == 0xE && bit_7 && !bit_6
-						// LINK, part_2 == 0xE && part_1 == 0x5
-						// MOVE_USP, part_2 == 0xE && part_1 == 0x6
-						// UNLK, part_2 == 0xE && part_1 == 0x5 && bit_3
+						// JMP, nybble_2 == 0xE && bit_7 && bit_6
+						// JSR, nybble_2 == 0xE && bit_7 && !bit_6
+						// LINK, nybble_2 == 0xE && nybble_1 == 0x5
+						// MOVE_USP, nybble_2 == 0xE && nybble_1 == 0x6
+						// UNLK, nybble_2 == 0xE && nybble_1 == 0x5 && bit_3
 						break;
 				}
 			}
 			break;
 		case 0x5:
-			if(part_1 == 0xB && bit_3)
+			if(nybble_1 == 0xB && bit_3)
 			{
 				// DBcc
 			}
@@ -230,7 +239,7 @@ int decode_instr(uint16_t *encoded, i68k *decoded)
 			}
 			break;
 		case 0x6:
-			switch(part_2)
+			switch(nybble_2)
 			{
 				case 0x0:
 					// BRA
@@ -247,7 +256,7 @@ int decode_instr(uint16_t *encoded, i68k *decoded)
 			// MOVEQ
 			break;
 		case 0x8:
-			if(part_1 == 0x0 && bit_8)
+			if(nybble_1 == 0x0 && bit_8)
 			{
 				// SBCD
 			}
@@ -297,7 +306,7 @@ int decode_instr(uint16_t *encoded, i68k *decoded)
 			}
 			break;
 		case 0xC:
-			if(part_1 == 0x0 && bit_8)
+			if(nybble_1 == 0x0 && bit_8)
 			{
 				// ABCD
 			}
@@ -305,7 +314,7 @@ int decode_instr(uint16_t *encoded, i68k *decoded)
 			{
 				// EXG
 			}
-			else if(part_2 == 0x6)
+			else if(nybble_2 == 0x6)
 			{
 				// NOT
 			}
@@ -332,7 +341,7 @@ int decode_instr(uint16_t *encoded, i68k *decoded)
 			if(bit_7 && bit_6)
 			{
 				// Memory Shift Instructions //
-				switch(part_2)
+				switch(nybble_2)
 				{
 					case 0x0:
 						// ASR
