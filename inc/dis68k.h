@@ -1,7 +1,7 @@
 #include "opcode.h"
-#include "fields.h"
+#include "op.h"
 
 typedef struct i68k {
 	int opcode;
-	union i68k_fields fields;
+	union op operation;
 } i68k;

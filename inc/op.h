@@ -1,0 +1,141 @@
+// Instruction Operation Structs // 
+
+#define OP_SIZE_BYTE 0
+#define OP_SIZE_WORD 1
+#define OP_SIZE_LONG 2
+
+#include "op/abcd.h"
+#include "op/add.h"
+#include "op/adda.h"
+#include "op/addi.h"
+#include "op/addq.h"
+#include "op/addx.h"
+#include "op/and.h"
+#include "op/andi.h"
+#include "op/asl.h"
+#include "op/asr.h"
+#include "op/bchg.h"
+#include "op/bclr.h"
+#include "op/bra.h"
+#include "op/bset.h"
+#include "op/bsr.h"
+#include "op/btst.h"
+#include "op/chk.h"
+#include "op/clr.h"
+#include "op/cmp.h"
+#include "op/cmpi.h"
+#include "op/cmpm.h"
+#include "op/divs.h"
+#include "op/divu.h"
+#include "op/eor.h"
+#include "op/eori.h"
+#include "op/exg.h"
+#include "op/ext.h"
+#include "op/illegal.h"
+#include "op/jmp.h"
+#include "op/jsr.h"
+#include "op/lea.h"
+#include "op/link.h"
+#include "op/lsl.h"
+#include "op/lsr.h"
+#include "op/move.h"
+#include "op/movea.h"
+#include "op/movem.h"
+#include "op/movep.h"
+#include "op/moveq.h"
+#include "op/move_usp.h"
+#include "op/nbcd.h"
+#include "op/neg.h"
+#include "op/negx.h"
+#include "op/nop.h"
+#include "op/not.h"
+#include "op/ori.h"
+#include "op/pea.h"
+#include "op/reset.h"
+#include "op/rol.h"
+#include "op/ror.h"
+#include "op/roxl.h"
+#include "op/roxr.h"
+#include "op/rte.h"
+#include "op/rtr.h"
+#include "op/rts.h"
+#include "op/sbcd.h"
+#include "op/stop.h"
+#include "op/sub.h"
+#include "op/subi.h"
+#include "op/subq.h"
+#include "op/subx.h"
+#include "op/swap.h"
+#include "op/tas.h"
+#include "op/trapv.h"
+#include "op/tst.h"
+#include "op/unlk.h"
+
+union op {
+	op_abcd     abcd;
+	op_add      add;
+	op_adda     adda;
+	op_addi     addi;
+	op_addq     addq;
+	op_addx     addx;
+	op_and      and;
+	op_andi     andi;
+	op_asl      asl;
+	op_asr      asr;
+	op_bchg     bchg;
+	op_bclr     bclr;
+	op_bra      bra;
+	op_bset     bset;
+	op_bsr      bsr;
+	op_btst     btst;
+	op_chk      chk;
+	op_clr      clr;
+	op_cmp      cmp;
+	op_cmpi     cmpi;
+	op_cmpm     cmpm;
+	op_divs     divs;
+	op_divu     divu;
+	op_eor      eor;
+	op_eori     eori;
+	op_exg      exg;
+	op_ext      ext;
+	op_illegal  illegal;
+	op_jmp      jmp;
+	op_jsr      jsr;
+	op_lea      lea;
+	op_link     link;
+	op_lsl      lsl;
+	op_lsr      lsr;
+	op_move     move;
+	op_movea    movea;
+	op_movem    movem;
+	op_movep    movep;
+	op_moveq    moveq;
+	op_move_usp move_usp;
+	op_nbcd     nbcd;
+	op_neg      neg;
+	op_negx     negx;
+	op_nop      nop;
+	op_not      not;
+	op_ori      ori;
+	op_pea      pea;
+	op_reset    reset;
+	op_rol      rol;
+	op_ror      ror;
+	op_roxl     roxl;
+	op_roxr     roxr;
+	op_rte      rte;
+	op_rtr      rtr;
+	op_rts      rts;
+	op_sbcd     sbcd;
+	op_stop     stop;
+	op_sub      sub;
+	op_subi     subi;
+	op_subq     subq;
+	op_subx     subx;
+	op_swap     swap;
+	op_tas      tas;
+	op_trapv    trapv;
+	op_tst      tst;
+	op_unlk     unlk;
+};
